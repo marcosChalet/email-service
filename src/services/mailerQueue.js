@@ -1,14 +1,17 @@
-require("dotenv").config({ path: "../../.env.local" });
+require("dotenv").config({ path: ".env.local" });
+const Redis = require("ioredis");
 const nodemailer = require("nodemailer");
 const { Queue, Worker } = require("bullmq");
 
-const redisConnection = process.env.REDIS_URL;
+const { MAILFROM, PASSWORD, REDIS_URL, MAILTO } = process.env;
+
+const redisConnection = new Redis(REDIS_URL);
 const emailQueue = new Queue("mailer", { connection: redisConnection });
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.MAILFROM,
-    pass: process.env.PASSWORD,
+    user: MAILFROM,
+    pass: PASSWORD,
   },
   secure: true,
 });
@@ -20,14 +23,10 @@ new Worker(
 
     try {
       const info = await transporter.sendMail(mailData);
-      console.log(
-        `E-mail enviado para ${process.env.MAILTO}: ${info.response}`
-      );
+      console.log(`E-mail enviado para ${MAILTO}: ${info.response}`);
       return info.response;
     } catch (error) {
-      console.error(
-        `Erro ao enviar e-mail para ${process.env.MAILTO}: ${error.message}`
-      );
+      console.error(`Erro ao enviar e-mail para ${MAILTO}: ${error.message}`);
       throw error;
     }
   },
