@@ -1,3 +1,4 @@
+const cors = require('cors');
 const express = require("express");
 const bodyParser = require("body-parser");
 const createEmail = require("./utils/createEmail");
@@ -7,7 +8,7 @@ const app = express();
 const PORT = 3000;
 const HOSTNAME = "localhost";
 
-app.use(bodyParser.json());
+app.use(bodyParser.json(), cors());
 
 app.post("/send-email", async (req, res) => {
   const { name, email, message } = req.body;
